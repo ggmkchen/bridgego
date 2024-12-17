@@ -7,7 +7,7 @@ export default defineConfig({
   base: './', // 相對路徑，適用於本地開發與生產環境
   server: {
     open: true, // 自動開啟瀏覽器
-    port: 3000, // 開發伺服器端口
+    port: process.env.PORT ? Number(process.env.PORT) : 5173, // 將字串轉換為數字
     proxy: {
       '/loginAsGuest': {
         target: 'https://bridge-4204.onrender.com',
