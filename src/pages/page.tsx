@@ -37,6 +37,68 @@ const CustomButton: React.FC<{ label: string; iconUrl?: string; icon?: React.Rea
   </button>
 );
 
+type Topic = "/topic/greetings" | "/topic/login" | "/topic/entry" | "/topic/begin" | "/topic/shuffle" | "/topic/call" | "/topic/play";
+
+const useWebSocket = (): {
+  sendMessage: (topic: string, body: any) => void;
+} => {
+  const setConnected = useWebSocketStore((state) => state.setConnected);
+  const addMessage = useWebSocketStore((state) => state.addMessage);
+  const stompClientRef = useRef<Client | null>(null);
+
+  useEffect(() => {
+    const stompClient: Client = new Client({
+      brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
+      reconnectDelay: 5000,
+    });
+
+    stompClientRef.current = stompClient;
+
+    stompClient.onConnect = (frame: IFrame) => {
+      console.log("Connected: ", frame);
+      setConnected(true);
+
+      const topics: Topic[] = [
+        "/topic/greetings",
+        "/topic/login",
+        "/topic/entry",
+        "/topic/begin",
+        "/topic/shuffle",
+        "/topic/call",
+        "/topic/play",
+      ];
+
+      topics.forEach((topic) => {
+        stompClient.subscribe(topic, (message: IMessage) => {
+          console.log(`收到 ${topic} 訊息: ${message.body}`);
+          addMessage(topic, message.body);
+        });
+      });
+    };
+
+    stompClient.activate();
+
+    return () => {
+      stompClient.deactivate();
+      setConnected(false);
+    };
+  }, [addMessage, setConnected]);
+
+  const sendMessage = (topic: string, body: any) => {
+    if (stompClientRef.current && stompClientRef.current.connected) {
+      stompClientRef.current.publish({
+        destination: topic,
+        body: JSON.stringify(body),
+      });
+      console.log(`訊息已發送到 ${topic}: `, body);
+    } else {
+      console.error("WebSocket 尚未連線，無法發送訊息！");
+    }
+  };
+
+  return { sendMessage };
+};
+
 
 const GuestInterface: React.FC = () => {
   const guestNameRef = useRef<HTMLInputElement>(null);  
@@ -264,6 +326,7 @@ export const GameListPage: React.FC = () => {
   const setAccount = useAppStore((state) => state.setAccount);
   const [currentIndex, setCurrentIndex] = useState(0); // 分頁索引
   const itemsPerPage = 3; // 每頁顯示的房間數量
+  const { sendMessage } = useWebSocket(); // 引入 WebSocket 功能
 
   interface Player {
     id: string | null;
@@ -326,6 +389,11 @@ export const GameListPage: React.FC = () => {
 
       if (response.status === 200) {
         console.log(`已成功加入房間 ${roomId}`);
+        sendMessage("/topic/entry", {
+          type: "ENTRY",
+          message: `new player ${account} has entered the room ${roomId}`,
+          createTime: new Date().toISOString(),
+        });
         setPage("room"); // 切換到遊戲房間頁面
       } else {
         console.error("加入房間失敗：", response.data);
@@ -460,6 +528,7 @@ const RoomPage: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
   const audioRef = useRef<HTMLAudioElement>(null);
+  const { sendMessage } = useWebSocket(); // 引入 WebSocket 功能
   
 
   const handlePlayMusic = () => {
@@ -470,68 +539,13 @@ const RoomPage: React.FC = () => {
     }
   };
 
-  // 定義主題類型
-  type Topic = "/topic/greetings" | "/topic/login" | "/topic/entry" | "/topic/begin" | "/topic/shuffle" | "/topic/call" | "/topic/play";
-
-  const useWebSocket = (): void => {
-    const setConnected = useWebSocketStore((state) => state.setConnected);
-    const addMessage = useWebSocketStore((state) => state.addMessage);
-    const connected = useWebSocketStore((state) => state.connected);
-    const messages = useWebSocketStore((state) => state.messages);
-
-    useEffect(() => {
-      const stompClient: Client = new Client({
-        brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
-        reconnectDelay: 5000,
-      });
-
-      // 當成功連線時
-      stompClient.onConnect = (frame: IFrame) => {
-        console.log("Connected: ", frame);
-        setConnected(true);
-
-        // 定義所有要訂閱的主題
-        const topics: Topic[] = [
-          "/topic/greetings",
-          "/topic/login",
-          "/topic/entry",
-          "/topic/begin",
-          "/topic/shuffle",
-          "/topic/call",
-          "/topic/play",
-        ];
-
-        // 訂閱主題
-        topics.forEach((topic) => {
-          const subscription: StompSubscription = stompClient.subscribe(topic, (message: IMessage) => {
-            console.log(`收到 ${topic} 訊息: ${message.body}`);
-            addMessage(topic, message.body); // 儲存訊息到 Zustand
-          });
-        });
-      };
-
-      // 處理 WebSocket 錯誤
-      stompClient.onWebSocketError = (error: Event) => {
-        console.error("WebSocket 錯誤: ", error);
-      };
-
-      // 處理 STOMP 錯誤
-      stompClient.onStompError = (frame: IFrame) => {
-        console.error("STOMP 錯誤: ", frame.headers["message"]);
-        console.error("STOMP 錯誤細節: ", frame.body);
-      };
-
-      stompClient.activate(); // 啟動 STOMP 客戶端
-
-      // 清理函式
-      return () => {
-        stompClient.deactivate(); // 停用 STOMP 客戶端
-        setConnected(false); // 更新連線狀態
-      };
-    }, [addMessage, setConnected]); // 依賴於 Zustand 的狀態更新函式
-  };
-
-  useWebSocket(); // 啟動 WebSocket
+  useEffect(() => {
+    sendMessage("/topic/entry", {
+      type: "ENTRY",
+      message: "Player has entered the room",
+      createTime: new Date().toISOString(),
+    });
+  }, [sendMessage]);
 
   return (
     <div
