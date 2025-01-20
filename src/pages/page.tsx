@@ -487,15 +487,18 @@ const RoomPage: React.FC = () => {
 
   useEffect(() => {
     console.log("確認 WebSocket 初始化...");
-    sendMessage("/topic/entry", { test: "init test" });
-    // 監聽來自 /topic/entry 的訊息
+    
+    if (connected) {
+      sendMessage("/topic/entry", { test: "init test" });
+    }
+  
     const entryMessages = messages.filter((msg) => msg.topic === "/topic/entry");
     if (entryMessages.length > 0) {
       entryMessages.forEach((msg) => {
         console.log("收到 /topic/entry 訊息: ", JSON.parse(msg.body));
       });
     }
-  }, [messages]);
+  }, [connected, messages]);
 
   // 監聽 `/topic/begin` 訊息，更新按鈕狀態
   useEffect(() => {
