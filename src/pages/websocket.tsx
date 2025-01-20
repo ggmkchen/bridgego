@@ -38,7 +38,7 @@ export const useWebSocket = (): {
     };
 
     stompClient.onStompError = (frame) => {
-      console.error("STOMP 錯誤，詳細資訊: ", frame);
+      console.error("STOMP 錯誤: ", frame.headers["message"]);
    };
 
     return () => {

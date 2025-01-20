@@ -486,6 +486,8 @@ const RoomPage: React.FC = () => {
   console.log("WebSocket Hook 已載入, 連線狀態:", connected);
 
   useEffect(() => {
+    console.log("確認 WebSocket 初始化...");
+    sendMessage("/topic/entry", { test: "init test" });
     // 監聽來自 /topic/entry 的訊息
     const entryMessages = messages.filter((msg) => msg.topic === "/topic/entry");
     if (entryMessages.length > 0) {
