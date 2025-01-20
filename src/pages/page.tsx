@@ -2,9 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { FaRegFaceGrin, FaRegFaceGrinWink } from "react-icons/fa6";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
-import { useAppStore, useWebSocketStore } from "../stores/store"; // 引入 zustand 狀態
-import { Client, IFrame, IMessage, StompSubscription } from "@stomp/stompjs";
-
+import { useWebSocket } from "./websocket";
+import { useAppStore} from "../stores/store"; // 引入 zustand 狀態
 
 
 const CustomButton: React.FC<{ label: string; iconUrl?: string; icon?: React.ReactNode; onClick?: () => void }> = ({
@@ -36,68 +35,6 @@ const CustomButton: React.FC<{ label: string; iconUrl?: string; icon?: React.Rea
     ></div>
   </button>
 );
-
-type Topic = "/topic/greetings" | "/topic/login" | "/topic/entry" | "/topic/begin" | "/topic/shuffle" | "/topic/call" | "/topic/play";
-
-const useWebSocket = (): {
-  sendMessage: (topic: string, body: any) => void;
-} => {
-  const setConnected = useWebSocketStore((state) => state.setConnected);
-  const addMessage = useWebSocketStore((state) => state.addMessage);
-  const stompClientRef = useRef<Client | null>(null);
-
-  useEffect(() => {
-    const stompClient: Client = new Client({
-      brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
-      reconnectDelay: 5000,
-    });
-
-    stompClientRef.current = stompClient;
-
-    stompClient.onConnect = (frame: IFrame) => {
-      console.log("Connected: ", frame);
-      setConnected(true);
-
-      const topics: Topic[] = [
-        "/topic/greetings",
-        "/topic/login",
-        "/topic/entry",
-        "/topic/begin",
-        "/topic/shuffle",
-        "/topic/call",
-        "/topic/play",
-      ];
-
-      topics.forEach((topic) => {
-        stompClient.subscribe(topic, (message: IMessage) => {
-          console.log(`收到 ${topic} 訊息: ${message.body}`);
-          addMessage(topic, message.body);
-        });
-      });
-    };
-
-    stompClient.activate();
-
-    return () => {
-      stompClient.deactivate();
-      setConnected(false);
-    };
-  }, [addMessage, setConnected]);
-
-  const sendMessage = (topic: string, body: any) => {
-    if (stompClientRef.current && stompClientRef.current.connected) {
-      stompClientRef.current.publish({
-        destination: topic,
-        body: JSON.stringify(body),
-      });
-      console.log(`訊息已發送到 ${topic}: `, body);
-    } else {
-      console.error("WebSocket 尚未連線，無法發送訊息！");
-    }
-  };
-
-  return { sendMessage };
-};
 
 
 const GuestInterface: React.FC = () => {
@@ -326,8 +263,8 @@ export const GameListPage: React.FC = () => {
   const setAccount = useAppStore((state) => state.setAccount);
   const [currentIndex, setCurrentIndex] = useState(0); // 分頁索引
   const itemsPerPage = 3; // 每頁顯示的房間數量
-  const { sendMessage } = useWebSocket(); // 引入 WebSocket 功能
 
+  
   interface Player {
     id: string | null;
     account: string;
@@ -389,11 +326,6 @@ export const GameListPage: React.FC = () => {
 
       if (response.status === 200) {
         console.log(`已成功加入房間 ${roomId}`);
-        sendMessage("/topic/entry", {
-          type: "ENTRY",
-          message: `new player ${account} has entered the room ${roomId}`,
-          createTime: new Date().toISOString(),
-        });
         setPage("room"); // 切換到遊戲房間頁面
       } else {
         console.error("加入房間失敗：", response.data);
@@ -528,9 +460,11 @@ const RoomPage: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { sendMessage } = useWebSocket(); // 引入 WebSocket 功能
+  const { sendMessage, messages } = useWebSocket();
+  const [isGameStartEnabled, setIsGameStartEnabled] = useState(false); // 控制按鈕是否啟用
   
 
+  // 播放音樂功能
   const handlePlayMusic = () => {
     if (audioRef.current) {
       audioRef.current.play().catch((error) => {
@@ -539,13 +473,37 @@ const RoomPage: React.FC = () => {
     }
   };
 
+  // 進入房間時發送 `/topic/entry` 訊息
   useEffect(() => {
     sendMessage("/topic/entry", {
       type: "ENTRY",
-      message: "Player has entered the room",
+      message: `new player ${account} has entered the room`,
       createTime: new Date().toISOString(),
     });
   }, [sendMessage]);
+
+  useEffect(() => {
+    // 監聽來自 /topic/entry 的訊息
+    const entryMessages = messages.filter((msg) => msg.topic === "/topic/entry");
+    if (entryMessages.length > 0) {
+      entryMessages.forEach((msg) => {
+        console.log("收到 /topic/entry 訊息: ", JSON.parse(msg.body));
+      });
+    }
+  }, [messages]);
+
+  // 監聽 `/topic/begin` 訊息，更新按鈕狀態
+  useEffect(() => {
+    const beginMessage = messages.find(
+      (msg) => msg.topic === "/topic/begin" //&& JSON.parse(msg.body).type === "BEGIN"
+    );
+
+    if (beginMessage) {
+      const parsedMessage = JSON.parse(beginMessage.body);
+      console.log("收到 /topic/begin 訊息: ", parsedMessage);
+      setIsGameStartEnabled(true); // 啟用「開始遊戲」按鈕
+    }
+  }, [messages]);
 
   return (
     <div
@@ -579,8 +537,12 @@ const RoomPage: React.FC = () => {
             </button>
             <button
               onClick={() => setPage("bidding")}
-              //disabled={true} // 這裡控制按鈕是否禁用
-              className="w-[120px] h-[40px] mt-4 py-2 px-6 bg-[#FFBF00] text-[#9D3E09] font-bold rounded shadow hover:brightness-110 bottom-12 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
+              disabled={!isGameStartEnabled} // 動態控制按鈕是否禁用
+              className={`w-[120px] h-[40px] mt-4 py-2 px-6 font-bold rounded shadow ${
+                isGameStartEnabled
+                  ? "bg-[#FFBF00] text-[#9D3E09] hover:brightness-110"
+                  : "bg-gray-400 text-gray-700 cursor-not-allowed"
+              }`}
             >
               開始遊戲
             </button>
