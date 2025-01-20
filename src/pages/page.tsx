@@ -460,7 +460,7 @@ const RoomPage: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
   const audioRef = useRef<HTMLAudioElement>(null);
-  const { sendMessage, messages } = useWebSocket();
+  const { sendMessage, messages, connected } = useWebSocket();
   const [isGameStartEnabled, setIsGameStartEnabled] = useState(false); // 控制按鈕是否啟用
   
 
@@ -482,6 +482,8 @@ const RoomPage: React.FC = () => {
       createTime: new Date().toISOString(),
     });
   }, [sendMessage]);*/
+
+  console.log("WebSocket Hook 已載入, 連線狀態:", connected);
 
   useEffect(() => {
     // 監聽來自 /topic/entry 的訊息
