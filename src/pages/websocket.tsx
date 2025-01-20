@@ -23,23 +23,23 @@ export const useWebSocket = (): {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
-    stompClient.onConnect = () => {
-      console.log("WebSocket 已連線");
+    stompClient.onConnect = (frame) => {
+      console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
       setConnected(true);
-
-      // 訂閱主題
+   
       const topics = ["/topic/entry", "/topic/begin"];
-      topics.forEach((topic) =>
+      topics.forEach((topic) => {
         stompClient.subscribe(topic, (message: IMessage) => {
-          console.log(`收到訊息: ${message.body}`);
+          console.log(`從 ${topic} 收到訊息: ${message.body}`);
           setMessages((prevMessages) => [...prevMessages, { topic, body: message.body }]);
-        })
-      );
+        });
+        console.log(`成功訂閱主題: ${topic}`);
+      });
     };
 
     stompClient.onStompError = (frame) => {
-      console.error("STOMP 錯誤: ", frame.headers["message"]);
-    };
+      console.error("STOMP 錯誤，詳細資訊: ", frame);
+   };
 
     return () => {
       stompClient.deactivate(); // 在應用結束時斷開連線
