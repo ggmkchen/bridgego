@@ -1,9 +1,7 @@
-// websocket.ts
+// websocket.tsx
 import { Client, IMessage } from "@stomp/stompjs";
-import { useEffect } from "react";
-import { useWebSocketStore } from "../stores/store";
+import { useEffect, useState } from "react";
 
-// 全域 WebSocket 客戶端
 const stompClient = new Client({
   brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
   reconnectDelay: 5000,
@@ -11,13 +9,18 @@ const stompClient = new Client({
 
 stompClient.activate(); // 啟動 WebSocket 客戶端
 
+interface WebSocketMessage {
+  topic: string;
+  body: string;
+}
+
 export const useWebSocket = (): {
   sendMessage: (topic: string, body: any) => void;
-  messages: { topic: string; body: string }[];
+  messages: WebSocketMessage[];
+  connected: boolean;
 } => {
-  const setConnected = useWebSocketStore((state) => state.setConnected);
-  const addMessage = useWebSocketStore((state) => state.addMessage);
-  const getMessages = useWebSocketStore((state) => state.getMessages);
+  const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
     stompClient.onConnect = () => {
@@ -29,7 +32,7 @@ export const useWebSocket = (): {
       topics.forEach((topic) =>
         stompClient.subscribe(topic, (message: IMessage) => {
           console.log(`收到訊息: ${message.body}`);
-          addMessage(topic, message.body);
+          setMessages((prevMessages) => [...prevMessages, { topic, body: message.body }]);
         })
       );
     };
@@ -41,7 +44,7 @@ export const useWebSocket = (): {
     return () => {
       stompClient.deactivate(); // 在應用結束時斷開連線
     };
-  }, [setConnected, addMessage]);
+  }, []);
 
   const sendMessage = (topic: string, body: any) => {
     if (stompClient.connected) {
@@ -55,5 +58,5 @@ export const useWebSocket = (): {
     }
   };
 
-  return { sendMessage, messages: getMessages() };
+  return { sendMessage, messages, connected };
 };

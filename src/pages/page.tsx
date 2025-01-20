@@ -473,6 +473,7 @@ const RoomPage: React.FC = () => {
     }
   };
 
+  /*
   // 進入房間時發送 `/topic/entry` 訊息
   useEffect(() => {
     sendMessage("/topic/entry", {
@@ -480,7 +481,7 @@ const RoomPage: React.FC = () => {
       message: `new player ${account} has entered the room`,
       createTime: new Date().toISOString(),
     });
-  }, [sendMessage]);
+  }, [sendMessage]);*/
 
   useEffect(() => {
     // 監聽來自 /topic/entry 的訊息
