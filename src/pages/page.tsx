@@ -473,44 +473,30 @@ const RoomPage: React.FC = () => {
     }
   };
 
-  /*
-  // 進入房間時發送 `/topic/entry` 訊息
+  // 進入房間時發送 ENTRY 訊息。
+  // useEffect 確保這個邏輯只會在 connected 改變時執行。
   useEffect(() => {
-    sendMessage("/topic/entry", {
-      type: "ENTRY",
-      message: `new player ${account} has entered the room`,
-      createTime: new Date().toISOString(),
-    });
-  }, [sendMessage]);*/
-
-  console.log("WebSocket Hook 已載入, 連線狀態:", connected);
-
-  useEffect(() => {
-    console.log("確認 WebSocket 初始化...");
-    
     if (connected) {
-      sendMessage("/topic/entry", { test: "init test" });
-    }
-  
-    const entryMessages = messages.filter((msg) => msg.topic === "/topic/entry");
-    if (entryMessages.length > 0) {
-      entryMessages.forEach((msg) => {
-        console.log("收到 /topic/entry 訊息: ", JSON.parse(msg.body));
+      sendMessage("/topic/entry", {
+        type: "ENTRY",
+        message: `new player ${account} has entered the room`,
+        createTime: new Date().toISOString(),
       });
+      console.log("已發送 ENTRY 訊息");
     }
-  }, [connected, messages]);
+  }, [connected]);
 
-  // 監聽 `/topic/begin` 訊息，更新按鈕狀態
+  // 處理接收到的 WebSocket 訊息。
+  // useEffect 確保這個邏輯只會在 message 改變時執行。
   useEffect(() => {
-    const beginMessage = messages.find(
-      (msg) => msg.topic === "/topic/begin" //&& JSON.parse(msg.body).type === "BEGIN"
-    );
-
-    if (beginMessage) {
-      const parsedMessage = JSON.parse(beginMessage.body);
-      console.log("收到 /topic/begin 訊息: ", parsedMessage);
-      setIsGameStartEnabled(true); // 啟用「開始遊戲」按鈕
-    }
+    messages.forEach((msg) => {
+      if (msg.topic === "/topic/entry") {
+        console.log("收到 /topic/entry 訊息:", JSON.parse(msg.body));
+      } else if (msg.topic === "/topic/begin") {
+        console.log("收到 /topic/begin 訊息:", JSON.parse(msg.body));
+        setIsGameStartEnabled(true);
+      }
+    });
   }, [messages]);
 
   return (
