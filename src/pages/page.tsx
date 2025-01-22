@@ -263,6 +263,7 @@ export const GameListPage: React.FC = () => {
   const setAccount = useAppStore((state) => state.setAccount);
   const [currentIndex, setCurrentIndex] = useState(0); // 分頁索引
   const itemsPerPage = 3; // 每頁顯示的房間數量
+  const setRoomId = useAppStore((state) => state.setRoomId);
 
   
   interface Player {
@@ -326,6 +327,7 @@ export const GameListPage: React.FC = () => {
 
       if (response.status === 200) {
         console.log(`已成功加入房間 ${roomId}`);
+        setRoomId(roomId.toString());
         setPage("room"); // 切換到遊戲房間頁面
       } else {
         console.error("加入房間失敗：", response.data);
@@ -462,6 +464,8 @@ const RoomPage: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { sendMessage, messages, connected } = useWebSocket();
   const [isGameStartEnabled, setIsGameStartEnabled] = useState(false); // 控制按鈕是否啟用
+  const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
+  const setRoomId = useAppStore((state) => state.setRoomId);
   
 
   // 播放音樂功能
@@ -499,6 +503,27 @@ const RoomPage: React.FC = () => {
     });
   }, [messages]);
 
+  // 開始遊戲 API 呼叫
+  const handleStartGame = async () => {
+    try {
+      const token = account; // 使用 account 作為 token
+      await axios.put(
+        `/game/${gameId}/status`,
+        { status: 'START' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 假設 API 需要 Bearer Token 格式
+          },
+        }
+      );
+      console.log('遊戲開始成功');
+      setPage('bidding');
+    } catch (error) {
+      console.error('開始遊戲失敗:', error);
+      alert('開始遊戲失敗，請稍後再試');
+    }
+  };
+
   return (
     <div
         className="h-screen bg-center bg-contain bg-no-repeat flex"
@@ -524,13 +549,16 @@ const RoomPage: React.FC = () => {
           />
           <div className="flex flex-row gap-6">
             <button
-              onClick={() => setPage("gamelist")}
+              onClick={() => {
+                setPage("gamelist");
+                setRoomId("");
+              }}
               className="w-[120px] h-[40px] mt-4 py-2 px-6 bg-[#FFBF00] text-[#9D3E09] font-bold rounded shadow hover:brightness-110 bottom-12"
             >
               退出房間
             </button>
             <button
-              onClick={() => setPage("bidding")}
+              onClick={handleStartGame}
               disabled={!isGameStartEnabled} // 動態控制按鈕是否禁用
               className={`w-[120px] h-[40px] mt-4 py-2 px-6 font-bold rounded shadow ${
                 isGameStartEnabled
