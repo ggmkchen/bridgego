@@ -5,9 +5,13 @@ import { useEffect, useState } from "react";
 const stompClient = new Client({
   brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
   reconnectDelay: 5000,
+  onConnect: (frame) => {
+    console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
+  },
+  onStompError: (frame) => {
+    console.error("STOMP 錯誤，詳細資訊: ", frame);
+  },
 });
-
-stompClient.activate(); // 啟動 WebSocket 客戶端
 
 interface WebSocketMessage {
   topic: string;
@@ -23,11 +27,13 @@ export const useWebSocket = (): {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
 
   useEffect(() => {
+    console.log("正在啟動 WebSocket 連線...");
+    stompClient.activate();
+
     stompClient.onConnect = (frame) => {
       console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
-      console.log("STOMP 客戶端狀態: ", stompClient.active);
       setConnected(true);
-   
+
       const topics = ["/topic/entry", "/topic/begin"];
       topics.forEach((topic) => {
         stompClient.subscribe(topic, (message: IMessage) => {
@@ -40,10 +46,11 @@ export const useWebSocket = (): {
 
     stompClient.onStompError = (frame) => {
       console.error("STOMP 錯誤，詳細資訊: ", frame);
-   };
+    };
 
     return () => {
-      stompClient.deactivate(); // 在應用結束時斷開連線
+      console.log("正在斷開 WebSocket 連線...");
+      stompClient.deactivate();
     };
   }, []);
 
