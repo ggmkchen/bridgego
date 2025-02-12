@@ -509,7 +509,7 @@ const RoomPage: React.FC = () => {
     try {
       const token = account; // 使用 account 作為 token
       await axios.put(
-        `/game/${gameId}/status`,
+        `/games/${gameId}/status`,
         { status: 'START' },
         {
           headers: {
