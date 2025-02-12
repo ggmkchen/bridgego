@@ -264,6 +264,7 @@ export const GameListPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0); // 分頁索引
   const itemsPerPage = 3; // 每頁顯示的房間數量
   const setRoomId = useAppStore((state) => state.setRoomId);
+  const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
 
   
   interface Player {
@@ -314,7 +315,7 @@ export const GameListPage: React.FC = () => {
 
     try {
       const response = await axios.put(
-        "/game",
+        "/games/${gameId}/players",
         {}, // 請求體可以根據需求填寫
         {
           headers: {
