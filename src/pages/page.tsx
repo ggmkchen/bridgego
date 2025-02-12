@@ -69,7 +69,7 @@ const GuestInterface: React.FC = () => {
         alert(`歡迎, ${account}！`);
 
         // 呼叫第二支 API (GET /game)
-        const gameResponse = await axios.get("/game", {
+        const gameResponse = await axios.get("/games", {
           headers: {
             "Content-Type": "application/json",
           },
@@ -293,7 +293,7 @@ export const GameListPage: React.FC = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get("/game"); 
+        const response = await axios.get("/games"); 
         setRooms(response.data);
       } catch (error) {
         console.error("無法獲取房間數據：", error);
