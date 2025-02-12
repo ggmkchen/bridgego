@@ -315,7 +315,7 @@ export const GameListPage: React.FC = () => {
 
     try {
       const response = await axios.put(
-        "/games/${gameId}/players",
+        `/games/${gameId}/players`,
         {}, // 請求體可以根據需求填寫
         {
           headers: {
