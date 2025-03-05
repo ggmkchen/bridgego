@@ -129,7 +129,7 @@ const GuestInterface: React.FC = () => {
         </div>
         <div className="flex flex-row">
           <button
-            onClick={() => setPage("bidding")}
+            onClick={() => setPage("bidding")} //home
             className="w-[80px] h-[40px] mt-4 py-2 mx-1 px-6 bg-[#f4f1e7] text-[#101010] font-bold rounded shadow hover:brightness-110"
           >
               返回
