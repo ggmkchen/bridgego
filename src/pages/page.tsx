@@ -129,7 +129,7 @@ const GuestInterface: React.FC = () => {
         </div>
         <div className="flex flex-row">
           <button
-            onClick={() => setPage("home")}
+            onClick={() => setPage("bidding")}
             className="w-[80px] h-[40px] mt-4 py-2 mx-1 px-6 bg-[#f4f1e7] text-[#101010] font-bold rounded shadow hover:brightness-110"
           >
               返回
@@ -581,7 +581,7 @@ const RoomPage: React.FC = () => {
             </button>
             <button
               //onClick={handleStartGame}
-              //disabled={!isGameStartEnabled} // 動態控制按鈕是否禁用
+              disabled={!isGameStartEnabled} // 動態控制按鈕是否禁用
               className={`w-[120px] h-[40px] mt-4 py-2 px-6 font-bold rounded shadow ${
                 isGameStartEnabled
                   ? "bg-[#FFBF00] text-[#9D3E09] hover:brightness-110"
