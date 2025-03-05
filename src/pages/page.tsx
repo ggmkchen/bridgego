@@ -618,7 +618,9 @@ export const GameBidding: React.FC = () => {
         <div className="w-[200px] h-[120px] rounded-[15px] border-[3px] border-[#804817] bg-[#FFF7E9] text-[#FFF] text-[20px] font-extrabold">
             <div className="absolute ml-16 mt-2 text-[#66635d] text-[25px]">王牌</div>
             <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]">
+             <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-sm font-bold">
               {selectedNum !== null ? `${selectedNum}NT` : "請選擇"}
+             </span>
             </div>
         </div>
       </div>
