@@ -464,7 +464,7 @@ const RoomPage: React.FC = () => {
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
   const audioRef = useRef<HTMLAudioElement>(null);
   const { sendMessage, messages, connected } = useWebSocket();
-  const [isGameStartEnabled, setIsGameStartEnabled] = useState(false); // 控制按鈕是否啟用
+  const [isGameStartEnabled, setIsGameStartEnabled] = useState(true); // 控制按鈕是否啟用
   const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
   const setRoomId = useAppStore((state) => state.setRoomId);
   const [countdown, setCountdown] = useState<number | null>(null); // 倒數計時
