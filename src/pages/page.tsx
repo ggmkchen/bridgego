@@ -602,9 +602,34 @@ export const GameBidding: React.FC = () => {
   const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
 
-  const callTypes = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB"];
+  const callType = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB", "PASS"];
   const [selectedNum, setSelectedNum] = useState<number | null>(null);
   const [selectedSuit, setSelectedSuit] = useState<string | null>(null);
+
+  // 叫牌 API 呼叫
+  const handleCall = async () => {
+    try {
+      const token = account; // 使用 account 作為 token
+      const response = await axios.post(
+        `/games/${gameId}/call`,
+        { 
+          "gameId": gameId,
+          "playerId": account,
+          "callType": selectedSuit, 
+          "number": selectedNum
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 假設 API 需要 Bearer Token 格式
+          },
+        }
+      );
+      console.log("叫牌 API 呼叫成功，回應:", response.data);
+    } catch (error) {
+      console.error("叫牌 API 呼叫失敗:", error);
+      alert("叫牌失敗，請稍後再試");
+    }
+  };
   
   return (
     <div
@@ -692,7 +717,7 @@ export const GameBidding: React.FC = () => {
                       <div key={num} 
                            onClick={() => {
                             setSelectedNum(num);
-                            setSelectedSuit("黑桃");
+                            setSelectedSuit("SPADE");
                           }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -709,7 +734,7 @@ export const GameBidding: React.FC = () => {
                       <div key={num}
                            onClick={() => {
                             setSelectedNum(num);
-                            setSelectedSuit("愛心");
+                            setSelectedSuit("HEART");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -726,7 +751,7 @@ export const GameBidding: React.FC = () => {
                       <div key={num}
                            onClick={() => {
                               setSelectedNum(num);
-                              setSelectedSuit("磚塊");
+                              setSelectedSuit("DIAMOND");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -743,7 +768,7 @@ export const GameBidding: React.FC = () => {
                       <div key={num}
                            onClick={() => {
                               setSelectedNum(num);
-                              setSelectedSuit("梅花");
+                              setSelectedSuit("CLUB");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -759,7 +784,12 @@ export const GameBidding: React.FC = () => {
               <div className="flex mt-4">
                   <div className="w-[304.3px] flex flex-row gap-[10px]">
                       <div className="relative flex-1 cursor-pointer">
-                          <div className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"></div>
+                          <div
+                            onClick={() => {
+                              setSelectedSuit("PASS");
+                            }} 
+                            className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"
+                          ></div>
                           <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">PASS</div>
                       </div>
                       <div className="relative w-[86px] h-[40px] cursor-pointer">
