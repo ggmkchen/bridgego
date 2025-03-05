@@ -597,91 +597,138 @@ const RoomPage: React.FC = () => {
 };
 
 
-const callTypes = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB"];
-const callTypeImages: Record<string, { icon: string; vector: string }> = {
-  NO_KING: { icon: "/icon.svg", vector: "" },
-  SPADE: { icon: "/icon-7.svg", vector: "/vector.svg" },
-  HEART: { icon: "/icon-14.svg", vector: "/vector-7.svg" },
-  DIAMOND: { icon: "/icon-21.svg", vector: "/vector-14.svg" },
-  CLUB: { icon: "/icon-28.svg", vector: "/vector-21.svg" },
-};
-
 export const GameBidding: React.FC = () => {
-  const gameId = useAppStore((state) => state.roomId);
-  const account = useAppStore((state) => state.account);
-  const [trump, setTrump] = useState<string | null>(null);
-  const [trickCount, setTrickCount] = useState<number | null>(null);
+  const setPage = useAppStore((state) => state.setPage);
+  const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
+  const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
 
-  const handleCall = async (callType: string, number: number | null) => {
-    try {
-      const token = account; // 使用 account 作為 token
-      const response = await axios.post(
-        `/game/${gameId}/call`,
-        {
-          gameId,
-          playerId: account,
-          callType,
-          number,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // 處理 API 回應
-      const { callHistory } = response.data;
-      if (callHistory) {
-        const lastValidCall = [...callHistory].reverse().find((call) => call.callType !== "PASS");
-        if (lastValidCall) {
-          setTrump(lastValidCall.callType);
-          setTrickCount(lastValidCall.number);
-        }
-      }
-    } catch (error) {
-      console.error("叫牌失敗: ", error);
-    }
-  };
-
+  const callTypes = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB"];
+  
   return (
-    <div className="h-screen bg-center bg-contain bg-no-repeat flex" style={{ backgroundImage: 'url("/start.png")' }}>
+    <div
+        className="h-screen bg-center bg-contain bg-no-repeat flex"
+        style={{ backgroundImage: 'url("/start.png")' }}
+    >
       <div className="absolute flex flex-col gap-1 bottom-[10px] right-[330px]">
-        <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold flex items-center justify-center">
-          <div className="text-[#FFF7E9] text-[16px]">墩數: {trickCount ?? "-"}</div>
+        <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
+            <div className="absolute ml-16 mt-3 font-bold text-[#FFF7E9] text-[16px]">墩數 :</div>
+            <div className="absolute w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]"></div>
         </div>
-        <div className="w-[200px] h-[120px] rounded-[15px] border-[3px] border-[#804817] bg-[#FFF7E9] text-[#FFF] text-[20px] font-extrabold flex items-center justify-center">
-          <div className="text-[#66635d] text-[25px]">王牌: {trump ?? "-"}</div>
+        <div className="w-[200px] h-[120px] rounded-[15px] border-[3px] border-[#804817] bg-[#FFF7E9] text-[#FFF] text-[20px] font-extrabold">
+            <div className="absolute ml-16 mt-2 text-[#66635d] text-[25px]">王牌</div>
+            <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]"></div>
+        </div>
+      </div>
+      <div className="absolute flex flex-col items-center justify-center space-y-1 bottom-2 left-[740px]">
+      {/* 圖片 */}
+        <img src="/rabbit_1.png" alt="" className="h-[25px] w-[40px]" />
+      {/* 下方的 div */}
+        <div className="relative flex flex-col items-center justify-center w-[68px] h-[30px] bg-transparent border-[3px] border-[#CA986B] rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+          <div className="inset-[2px] bg-[#593E25] rounded-[25px] w-full h-full"></div>
+          <div className="absolute w-full text-center text-[#FFF7E9] font-semibold">0</div>
+        </div>
+      </div>
+      <div className="absolute flex flex-col items-center justify-center space-y-1 top-2 left-[740px]">
+      {/* 圖片 */}
+        <img src="/rabbit_2.png" alt="" className="h-[25px] w-[40px]" />
+      {/* 下方的 div */}
+        <div className="relative flex flex-col items-center justify-center w-[68px] h-[30px] bg-transparent border-[3px] border-[#CA986B] rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+          <div className="inset-[2px] bg-[#593E25] rounded-[25px] w-full h-full"></div>
+          <div className="absolute w-full text-center text-[#FFF7E9] font-semibold">0</div>
+        </div>
+      </div>
+      <div className="absolute flex flex-col items-center justify-center space-y-1 top-1/2 left-[330px]">
+      {/* 圖片 */}
+        <img src="/rabbit_3.png" alt="" className="h-[25px] w-[40px]" />
+      {/* 下方的 div */}
+        <div className="relative flex flex-col items-center justify-center w-[68px] h-[30px] bg-transparent border-[3px] border-[#CA986B] rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+          <div className="inset-[2px] bg-[#593E25] rounded-[25px] w-full h-full"></div>
+          <div className="absolute w-full text-center text-[#FFF7E9] font-semibold">0</div>
+        </div>
+      </div>
+      <div className="absolute flex flex-col items-center justify-center space-y-1 top-1/2 right-[330px]">
+      {/* 圖片 */}
+        <img src="/rabbit_4.png" alt="" className="h-[25px] w-[40px]" />
+      {/* 下方的 div */}
+        <div className="relative flex flex-col items-center justify-center w-[68px] h-[30px] bg-transparent border-[3px] border-[#CA986B] rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+          <div className="inset-[2px] bg-[#593E25] rounded-[25px] w-full h-full"></div>
+          <div className="absolute w-full text-center text-[#FFF7E9] font-semibold">0</div>
         </div>
       </div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] z-3 bg-[#fffbf3] flex flex-col justify-center shadow-md rounded-lg border-2 border-[#804817]">
-        <div className="flex flex-col items-center justify-center">
-          {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-            <div key={num} className="flex space-x-2 ml-2 mr-2 mt-2">
-              {callTypes.map((type) => (
-                <div
-                  key={`${type}-${num}`}
-                  className="relative flex flex-row items-center cursor-pointer"
-                  onClick={() => handleCall(type, num)}
-                >
-                  <img src={callTypeImages[type].icon} alt={type} className="h-[35px] w-[55px]" />
-                  <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-black text-sm font-bold">
-                    {num}
-                  </span>
-                  {callTypeImages[type].vector && (
-                    <img src={callTypeImages[type].vector} alt="vector" className="absolute top-[5px] left-[6px] h-[15px] w-[15px]" />
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-          <button
-            className="mt-4 px-6 py-2 bg-green-600 text-white font-bold rounded-lg cursor-pointer"
-            onClick={() => handleCall("PASS", null)}
-          >
-            PASS
-          </button>
-        </div>
+          <div className="flex flex-col items-center justify-center">
+              <div className="relative mb-[10px] w-[88px] h-[40px] bg-transparent border-[3px] border-[#804817] rounded-[20px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+                  <div className="absolute inset-[2px] bg-[#804817] rounded-[25px]"></div>
+                  <div className="absolute w-full text-center text-[#FFF7E9] font-semibold top-[20%]">王牌區</div>
+              </div>
+              <div className="flex space-x-2 ml-2 mr-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="relative flex flex-col items-center cursor-pointer">
+                          <img src="/icon.svg" alt="" className="h-[35px] w-[50px]" />
+                          <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-sm font-bold">
+                            {num}NT
+                          </span>
+                      </div>
+                  ))}
+              </div>
+              <div className="flex space-x-2 ml-2 mr-2 mt-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                          <img src="/icon-7.svg" alt="" className="h-[35px] w-[55px]" />
+                          <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#000000] text-sm font-bold">
+                            {num}
+                          </span>
+                          <img src="/vector.svg" alt="" className="absolute top-[5px] left-[6px] h-[15px] w-[15px]" />
+                      </div>
+                  ))}
+              </div>
+              <div className="flex space-x-2 ml-2 mr-2 mt-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                          <img src="/icon-14.svg" alt="" className="h-[35px] w-[55px]" />
+                          <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#944C88] text-sm font-bold">
+                            {num}
+                          </span>
+                          <img src="/vector-7.svg" alt="" className="absolute top-[6px] left-[3px] h-[20px] w-[20px]" />
+                      </div>
+                  ))}
+              </div>
+              <div className="flex space-x-2 ml-2 mr-2 mt-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                          <img src="/icon-21.svg" alt="" className="h-[35px] w-[55px]" />
+                          <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#6F4C18] text-sm font-bold">
+                            {num}
+                          </span>
+                          <img src="/vector-14.svg" alt="" className="absolute top-[6px] left-[6px] h-[15px] w-[15px]" />
+                      </div>
+                  ))}
+              </div>
+              <div className="flex space-x-2 ml-2 mr-2 mt-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                          <img src="/icon-28.svg" alt="" className="h-[35px] w-[55px]" />
+                          <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#58B5F9] text-sm font-bold">
+                            {num}
+                          </span>
+                          <img src="/vector-21.svg" alt="" className="absolute top-[6px] left-[6px] h-[15px] w-[15px]" />
+                      </div>
+                  ))}
+              </div>
+              {/* 重複的區塊，根據不同的 icon 和樣式調整 */}
+              <div className="flex mt-4">
+                  <div className="w-[304.3px] flex flex-row gap-[10px]">
+                      <div className="relative flex-1 cursor-pointer">
+                          <div className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"></div>
+                          <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">PASS</div>
+                      </div>
+                      <div className="relative w-[86px] h-[40px] cursor-pointer">
+                          <div className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-yellow-400 border border-yellow-300 rounded-[15px]"></div>
+                          <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">V</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
     </div>
   );
