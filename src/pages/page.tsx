@@ -640,8 +640,8 @@ export const GameBidding: React.FC = () => {
         <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
             <div className="absolute ml-16 mt-3 font-bold text-[#FFF7E9] text-[16px]">墩數 :</div>
             <div className="absolute w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]">
-              <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[25px] font-bold">
-                {selectedNum !== null ? `${6+selectedNum}` : "請選擇"}
+              <span className="absolute top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[25px] font-bold">
+                {selectedNum !== null ? `${6 + selectedNum}` : ''}
               </span>
             </div>
         </div>
@@ -702,7 +702,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                               setSelectedNum(num);
                               setSelectedSuit("NO_KING");
-                              handleCall
+                              handleCall();
                            }} 
                            className="relative flex flex-col items-center cursor-pointer"
                       >
@@ -719,7 +719,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                             setSelectedNum(num);
                             setSelectedSuit("SPADE");
-                            handleCall
+                            handleCall();
                           }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -737,7 +737,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                             setSelectedNum(num);
                             setSelectedSuit("HEART");
-                            handleCall
+                            handleCall();
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -755,7 +755,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                               setSelectedNum(num);
                               setSelectedSuit("DIAMOND");
-                              handleCall
+                              handleCall();
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -773,7 +773,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                               setSelectedNum(num);
                               setSelectedSuit("CLUB");
-                              handleCall
+                              handleCall();
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -792,7 +792,7 @@ export const GameBidding: React.FC = () => {
                           <div
                             onClick={() => {
                               setSelectedSuit("PASS");
-                              handleCall
+                              handleCall();
                             }} 
                             className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"
                           ></div>
