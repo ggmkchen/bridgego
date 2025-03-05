@@ -603,6 +603,7 @@ export const GameBidding: React.FC = () => {
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
 
   const callTypes = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB"];
+  const [selectedNum, setSelectedNum] = useState<number | null>(null);
   
   return (
     <div
@@ -616,7 +617,9 @@ export const GameBidding: React.FC = () => {
         </div>
         <div className="w-[200px] h-[120px] rounded-[15px] border-[3px] border-[#804817] bg-[#FFF7E9] text-[#FFF] text-[20px] font-extrabold">
             <div className="absolute ml-16 mt-2 text-[#66635d] text-[25px]">王牌</div>
-            <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]"></div>
+            <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]">
+              {selectedNum !== null ? `${selectedNum}NT` : "請選擇"}
+            </div>
         </div>
       </div>
       <div className="absolute flex flex-col items-center justify-center space-y-1 bottom-2 left-[740px]">
@@ -663,7 +666,7 @@ export const GameBidding: React.FC = () => {
               </div>
               <div className="flex space-x-2 ml-2 mr-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <div key={num} className="relative flex flex-col items-center cursor-pointer">
+                      <div key={num} onClick={() => setSelectedNum(num)} className="relative flex flex-col items-center cursor-pointer">
                           <img src="/icon.svg" alt="" className="h-[35px] w-[50px]" />
                           <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-sm font-bold">
                             {num}NT
