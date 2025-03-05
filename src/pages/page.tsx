@@ -467,6 +467,7 @@ const RoomPage: React.FC = () => {
   const [isGameStartEnabled, setIsGameStartEnabled] = useState(false); // 控制按鈕是否啟用
   const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
   const setRoomId = useAppStore((state) => state.setRoomId);
+  const [countdown, setCountdown] = useState<number | null>(null); // 倒數計時
   
 
   // 播放音樂功能
@@ -491,39 +492,59 @@ const RoomPage: React.FC = () => {
     }
   }, [connected]);
 
-  // 處理接收到的 WebSocket 訊息。
-  // useEffect 確保這個邏輯只會在 message 改變時執行。
-  useEffect(() => {
-    messages.forEach((msg) => {
-      if (msg.topic === "/topic/entry") {
-        console.log("收到 /topic/entry 訊息:", JSON.parse(msg.body));
-      } else if (msg.topic === "/topic/begin") {
-        console.log("收到 /topic/begin 訊息:", JSON.parse(msg.body));
-        setIsGameStartEnabled(true);
-      }
-    });
-  }, [messages]);
-
-  // 開始遊戲 API 呼叫
+  // 立即開始遊戲 API 呼叫（處理 READY 訊息）
   const handleStartGame = async () => {
     try {
       const token = account; // 使用 account 作為 token
       await axios.put(
         `/games/${gameId}/status`,
-        { status: 'START' },
+        { status: "START" },
         {
           headers: {
             Authorization: `Bearer ${token}`, // 假設 API 需要 Bearer Token 格式
           },
         }
       );
-      console.log('遊戲開始成功');
-      setPage('bidding');
+      console.log("遊戲開始 API 呼叫成功");
     } catch (error) {
-      console.error('開始遊戲失敗:', error);
-      alert('開始遊戲失敗，請稍後再試');
+      console.error("開始遊戲 API 呼叫失敗:", error);
+      alert("開始遊戲失敗，請稍後再試");
     }
   };
+
+  // 處理 WebSocket 訊息
+  useEffect(() => {
+    messages.forEach((msg) => {
+      const parsedMsg = JSON.parse(msg.body);
+
+      if (msg.topic.startsWith("/topic/begin/")) {
+        console.log("收到 /topic/begin 訊息:", parsedMsg);
+
+        if (parsedMsg.type === "READY") {
+          console.log("收到 READY 訊息，呼叫開始遊戲 API");
+          handleStartGame(); // 立即打 API，變更遊戲狀態
+        }
+
+        if (parsedMsg.type === "BEGIN") {
+          console.log("收到 BEGIN 訊息，開始倒數計時！");
+          setIsGameStartEnabled(true);
+          setCountdown(5);
+
+          // 開始倒數
+          const timer = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev === null || prev <= 1) {
+                clearInterval(timer);
+                setPage("bidding"); // 倒數結束後自動跳轉
+                return null;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+      }
+    });
+  }, [messages]);
 
   return (
     <div
@@ -567,7 +588,7 @@ const RoomPage: React.FC = () => {
                   : "bg-gray-400 text-gray-700 cursor-not-allowed"
               }`}
             >
-              開始遊戲
+              開始遊戲 {countdown !== null ? `(${countdown}s)` : ""}
             </button>
           </div>
       </div>
