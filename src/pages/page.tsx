@@ -688,7 +688,7 @@ export const GameBidding: React.FC = () => {
                       <div key={num} 
                            onClick={() => {
                             setSelectedNum(num);
-                            setSelectedSuit("/vector.svg");
+                            setSelectedSuit("黑桃");
                           }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -702,7 +702,13 @@ export const GameBidding: React.FC = () => {
               </div>
               <div className="flex space-x-2 ml-2 mr-2 mt-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                      <div key={num}
+                           onClick={() => {
+                            setSelectedNum(num);
+                            setSelectedSuit("愛心");
+                           }} 
+                           className="relative flex flex-row items-center cursor-pointer"
+                      >
                           <img src="/icon-14.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#944C88] text-sm font-bold">
                             {num}
@@ -713,7 +719,13 @@ export const GameBidding: React.FC = () => {
               </div>
               <div className="flex space-x-2 ml-2 mr-2 mt-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                      <div key={num}
+                           onClick={() => {
+                              setSelectedNum(num);
+                              setSelectedSuit("磚塊");
+                           }} 
+                           className="relative flex flex-row items-center cursor-pointer"
+                      >
                           <img src="/icon-21.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#6F4C18] text-sm font-bold">
                             {num}
@@ -724,7 +736,13 @@ export const GameBidding: React.FC = () => {
               </div>
               <div className="flex space-x-2 ml-2 mr-2 mt-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <div key={num} className="relative flex flex-row items-center cursor-pointer">
+                      <div key={num}
+                           onClick={() => {
+                              setSelectedNum(num);
+                              setSelectedSuit("梅花");
+                           }} 
+                           className="relative flex flex-row items-center cursor-pointer"
+                      >
                           <img src="/icon-28.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#58B5F9] text-sm font-bold">
                             {num}
