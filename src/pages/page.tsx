@@ -41,7 +41,8 @@ const GuestInterface: React.FC = () => {
   const guestNameRef = useRef<HTMLInputElement>(null);  
   const setAccount = useAppStore((state) => state.setAccount);
   const setPage = useAppStore((state) => state.setPage);
-  const userType = useAppStore((state) => state.userType); // 從store拿取userType的值。
+  const type = useAppStore((state) => state.userType); // 從store拿取userType的值。
+
 
   const handleLoginAndFetchGame = async () => {
     if (!guestNameRef.current) return;
@@ -56,7 +57,7 @@ const GuestInterface: React.FC = () => {
       // 呼叫第一支 API (POST /loginAsGuest)
       const loginResponse = await axios.post(
         "/players",
-        { account, userType },
+        { account, type },
         {
           headers: {
             "Content-Type": "application/json",
