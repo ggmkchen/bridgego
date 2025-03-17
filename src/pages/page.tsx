@@ -601,11 +601,12 @@ const RoomPage: React.FC = () => {
 
 export const GameBidding: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
-  const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
-  const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
+  const gameId = useAppStore((state) => state.roomId);             // 從 Zustand Store 獲取 gameId
+  const account = useAppStore((state) => state.account);           // 從 Zustand Store 獲取 account
   const [selectedNum, setSelectedNum] = useState(0);
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
-  const [selectedBidRank, setSelectedBidRank] = useState(0);   // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
+  const [selectedBidRank, setSelectedBidRank] = useState(0);       // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
+  const [disabledAll, setDisabledAll] = useState<boolean>(false);  // 新增一個 state，用來標記是否已點擊 PASS，若 true 則 disable 所有叫牌按鈕
 
   
   // 定義花色型別，限定只有這五種
@@ -657,12 +658,11 @@ export const GameBidding: React.FC = () => {
   
   // 處理按鈕點選的邏輯
   const handleBid = (num: number, suit: Suit): void => {
+    if (disabledAll) return;              // 若已 disable 所有叫牌，則不處理
     const rank = getBidRank(num, suit);
-    // 若點選的叫牌低於目前已選擇的，則不處理
-    if (rank < selectedBidRank) return;
+    if (rank < selectedBidRank) return;   // 若點選的叫牌低於目前已選擇的，則不處理
     setSelectedBidRank(rank);
-    // 呼叫外部傳入的 handleCall 函式
-    handleCall(num, suit);
+    handleCall(num, suit);                // 呼叫外部傳入的 handleCall 函式
   };
   
   return (
@@ -730,13 +730,16 @@ export const GameBidding: React.FC = () => {
                   <div className="absolute inset-[2px] bg-[#804817] rounded-[25px]"></div>
                   <div className="absolute w-full text-center text-[#FFF7E9] font-semibold top-[20%]">王牌區</div>
               </div>
+              {/* 各花色的叫牌按鈕區塊 */}
               <div className="flex space-x-2 ml-2 mr-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
                     const currentRank = getBidRank(num, "NO_KING");
-                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
                     console.log(`currentRank=${currentRank}`)
-                    const disabled: boolean = selectedBidRank > 0 && currentRank <= selectedBidRank;
+
+                    // 判斷此按鈕是否要 disabled：若已點擊 PASS (disabledAll 為 true) 或根據既有邏輯則 disabled
+                    const disabled: boolean = disabledAll || (selectedBidRank > 0 && currentRank <= selectedBidRank); 
+
                     console.log(`currentRank=${selectedBidRank}`)
                     return(
                       <div key={num} 
@@ -746,7 +749,9 @@ export const GameBidding: React.FC = () => {
                             setSelectedSuit("NO_KING");
                             handleBid(num, "NO_KING"); // 直接傳入點擊的值
                           }}
-                           className="relative flex flex-col items-center cursor-pointer"
+                          className={`relative flex flex-col items-center cursor-pointer ${
+                            disabled ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                           <img src="/icon.svg" alt="" className="h-[35px] w-[50px]" />
                           <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-sm font-bold">
@@ -759,9 +764,10 @@ export const GameBidding: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
                     const currentRank = getBidRank(num, "SPADE");
-                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
                     console.log(`currentRank=${currentRank}`)
-                    const disabled: boolean = selectedBidRank > 0 && currentRank <= selectedBidRank;
+
+                    // 判斷此按鈕是否要 disabled：若已點擊 PASS (disabledAll 為 true) 或根據既有邏輯則 disabled
+                    const disabled: boolean = disabledAll || (selectedBidRank > 0 && currentRank <= selectedBidRank);
                     console.log(`currentRank=${selectedBidRank}`)
                     return(
                       <div key={num} 
@@ -770,8 +776,10 @@ export const GameBidding: React.FC = () => {
                             setSelectedNum(num);
                             setSelectedSuit("SPADE");
                             handleBid(num, "SPADE");
-                          }} 
-                           className="relative flex flex-row items-center cursor-pointer"
+                           }} 
+                           className={`relative flex flex-row items-center cursor-pointer ${
+                            disabled ? "opacity-50 cursor-not-allowed" : ""
+                           }`}
                       >
                           <img src="/icon-7.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#000000] text-sm font-bold">
@@ -785,9 +793,11 @@ export const GameBidding: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
                     const currentRank = getBidRank(num, "HEART");
-                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
                     console.log(`currentRank=${currentRank}`)
-                    const disabled: boolean = selectedBidRank > 0 && currentRank <= selectedBidRank;
+
+                    // 判斷此按鈕是否要 disabled：若已點擊 PASS (disabledAll 為 true) 或根據既有邏輯則 disabled
+                    const disabled: boolean = disabledAll || (selectedBidRank > 0 && currentRank <= selectedBidRank);
+
                     console.log(`currentRank=${selectedBidRank}`)
                     return(
                       <div key={num}
@@ -797,7 +807,9 @@ export const GameBidding: React.FC = () => {
                             setSelectedSuit("HEART");
                             handleBid(num, "HEART");
                            }} 
-                           className="relative flex flex-row items-center cursor-pointer"
+                           className={`relative flex flex-row items-center cursor-pointer ${
+                            disabled ? "opacity-50 cursor-not-allowed" : ""
+                           }`}
                       >
                           <img src="/icon-14.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#944C88] text-sm font-bold">
@@ -811,9 +823,11 @@ export const GameBidding: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
                     const currentRank = getBidRank(num, "DIAMOND");
-                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
                     console.log(`currentRank=${currentRank}`)
-                    const disabled: boolean = selectedBidRank > 0 && currentRank <= selectedBidRank;
+
+                    // 判斷此按鈕是否要 disabled：若已點擊 PASS (disabledAll 為 true) 或根據既有邏輯則 disabled
+                    const disabled: boolean = disabledAll || (selectedBidRank > 0 && currentRank <= selectedBidRank);
+
                     console.log(`currentRank=${selectedBidRank}`)
                     return(  
                       <div key={num}
@@ -823,7 +837,9 @@ export const GameBidding: React.FC = () => {
                               setSelectedSuit("DIAMOND");
                               handleBid(num, "DIAMOND");
                            }} 
-                           className="relative flex flex-row items-center cursor-pointer"
+                           className={`relative flex flex-row items-center cursor-pointer ${
+                            disabled ? "opacity-50 cursor-not-allowed" : ""
+                           }`}
                       >
                           <img src="/icon-21.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#6F4C18] text-sm font-bold">
@@ -837,9 +853,11 @@ export const GameBidding: React.FC = () => {
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
                     const currentRank = getBidRank(num, "CLUB");
-                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
                     console.log(`currentRank=${currentRank}`)
-                    const disabled: boolean = selectedBidRank > 0 && currentRank <= selectedBidRank;
+
+                    // 判斷此按鈕是否要 disabled：若已點擊 PASS (disabledAll 為 true) 或根據既有邏輯則 disabled
+                    const disabled: boolean = disabledAll || (selectedBidRank > 0 && currentRank <= selectedBidRank);
+
                     console.log(`currentRank=${selectedBidRank}`)
                     return(
                       <div key={num}
@@ -849,7 +867,9 @@ export const GameBidding: React.FC = () => {
                               setSelectedSuit("CLUB");
                               handleBid(num, "CLUB");
                            }} 
-                           className="relative flex flex-row items-center cursor-pointer"
+                           className={`relative flex flex-row items-center cursor-pointer ${
+                            disabled ? "opacity-50 cursor-not-allowed" : ""
+                           }`}
                       >
                           <img src="/icon-28.svg" alt="" className="h-[35px] w-[55px]" />
                           <span className="absolute top-1/3 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#58B5F9] text-sm font-bold">
@@ -866,7 +886,8 @@ export const GameBidding: React.FC = () => {
                           <div
                             onClick={() => {
                               setSelectedSuit("PASS");
-                              handleBid( 0 , "PASS");
+                              setDisabledAll(true);        // 點擊 PASS 後，更新狀態並 disable 所有叫牌按鈕
+                              handleCall( 0 , "PASS");
                             }} 
                             className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"
                           ></div>
