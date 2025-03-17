@@ -603,13 +603,33 @@ export const GameBidding: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const gameId = useAppStore((state) => state.roomId); // 從 Zustand Store 獲取 gameId
   const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
+  const [selectedNum, setSelectedNum] = useState(0);
+  const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
+  const [selectedBidRank, setSelectedBidRank] = useState(0);   // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
 
-  const callType = ["NO_KING", "SPADE", "HEART", "DIAMOND", "CLUB", "PASS"];
-  const [selectedNum, setSelectedNum] = useState<number | null>(null);
-  const [selectedSuit, setSelectedSuit] = useState<string | null>(null);
+  
+  // 定義花色型別，限定只有這五種
+  type Suit = "NO_KING" | "SPADE" | "HEART" | "DIAMOND" | "CLUB" | "PASS";
+
+
+  // 定義花色的等級，較大的數值代表較高的花色
+  const suitRank: Record<Suit, number> = {
+    NO_KING: 5,
+    SPADE: 4,
+    HEART: 3,
+    DIAMOND: 2,
+    CLUB: 1,
+    PASS: 0
+  };
+
+  // 根據數字與花色計算叫牌等級，公式： (數字 - 1) * 5 + 花色等級
+  function getBidRank(num: number, suit: Suit): number {
+    return (num - 1) * 5 + suitRank[suit];
+  }
+
 
   // 叫牌 API 呼叫
-  const handleCall = async () => {
+  const handleCall = async (num: number, suit: Suit): Promise<void> => {
     try {
       const token = account; // 使用 account 作為 token
       const response = await axios.post(
@@ -617,8 +637,8 @@ export const GameBidding: React.FC = () => {
         { 
           "gameId": gameId,
           "playerId": account,
-          "callType": selectedSuit, 
-          "number": selectedNum
+          "callType": suit, 
+          "number": num
         },
         {
           headers: {
@@ -631,6 +651,18 @@ export const GameBidding: React.FC = () => {
       console.error("叫牌 API 呼叫失敗:", error);
       alert("叫牌失敗，請稍後再試");
     }
+  };
+
+
+  
+  // 處理按鈕點選的邏輯
+  const handleBid = (num: number, suit: Suit): void => {
+    const rank = getBidRank(num, suit);
+    // 若點選的叫牌低於目前已選擇的，則不處理
+    if (rank < selectedBidRank) return;
+    setSelectedBidRank(rank);
+    // 呼叫外部傳入的 handleCall 函式
+    handleCall(num, suit);
   };
   
   return (
@@ -699,13 +731,20 @@ export const GameBidding: React.FC = () => {
                   <div className="absolute w-full text-center text-[#FFF7E9] font-semibold top-[20%]">王牌區</div>
               </div>
               <div className="flex space-x-2 ml-2 mr-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => {
+                    // 計算目前按鈕的叫牌等級
+                    const AreaSuit = "NO_KING";
+                    const currentRank = getBidRank(num, AreaSuit);
+                    // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
+                    const disabled: boolean = selectedBidRank > 0 && currentRank < selectedBidRank;
+                    return(
                       <div key={num} 
-                           onClick={() => {
-                              setSelectedNum(num);
-                              setSelectedSuit("NO_KING");
-                              handleCall();
-                           }} 
+                          onClick={() => {
+                            if (disabled) return; // 先檢查 disabled，再更新 state 與呼叫函式
+                            setSelectedNum(num);
+                            setSelectedSuit("NO_KING");
+                            handleBid(num, "NO_KING"); // 直接傳入點擊的值
+                          }}
                            className="relative flex flex-col items-center cursor-pointer"
                       >
                           <img src="/icon.svg" alt="" className="h-[35px] w-[50px]" />
@@ -713,7 +752,7 @@ export const GameBidding: React.FC = () => {
                             {num}NT
                           </span>
                       </div>
-                  ))}
+                  )})}
               </div>
               <div className="flex space-x-2 ml-2 mr-2 mt-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => (
@@ -721,7 +760,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                             setSelectedNum(num);
                             setSelectedSuit("SPADE");
-                            handleCall();
+                            handleCall(num, "SPADE");
                           }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -739,7 +778,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                             setSelectedNum(num);
                             setSelectedSuit("HEART");
-                            handleCall();
+                            handleCall(num, "HEART");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -757,7 +796,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                               setSelectedNum(num);
                               setSelectedSuit("DIAMOND");
-                              handleCall();
+                              handleCall(num, "DIAMOND");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -775,7 +814,7 @@ export const GameBidding: React.FC = () => {
                            onClick={() => {
                               setSelectedNum(num);
                               setSelectedSuit("CLUB");
-                              handleCall();
+                              handleCall(num, "CLUB");
                            }} 
                            className="relative flex flex-row items-center cursor-pointer"
                       >
@@ -794,7 +833,7 @@ export const GameBidding: React.FC = () => {
                           <div
                             onClick={() => {
                               setSelectedSuit("PASS");
-                              handleCall();
+                              handleCall( 0 , "PASS");
                             }} 
                             className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"
                           ></div>

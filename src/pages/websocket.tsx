@@ -1,6 +1,7 @@
 // websocket.tsx
 import { Client, IMessage } from "@stomp/stompjs";
 import { useEffect, useState } from "react";
+import { useAppStore} from "../stores/store"; // 引入 zustand 狀態
 
 const stompClient = new Client({
   brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
@@ -25,6 +26,7 @@ export const useWebSocket = (): {
 } => {
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
+  const account = useAppStore((state) => state.account); // 從 Zustand Store 獲取 account
 
   useEffect(() => {
     console.log("正在啟動 WebSocket 連線...");
@@ -34,7 +36,7 @@ export const useWebSocket = (): {
       console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
       setConnected(true);
 
-      const topics = ["/topic/entry", "/topic/begin"];
+      const topics = [`/topic/entry/${account}`, `/topic/begin/${account}`];
       topics.forEach((topic) => {
         stompClient.subscribe(topic, (message: IMessage) => {
           console.log(`從 ${topic} 收到訊息: ${message.body}`);
