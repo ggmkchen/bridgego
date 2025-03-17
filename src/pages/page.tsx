@@ -879,7 +879,6 @@ export const GameBidding: React.FC = () => {
                       </div>
                   )})}
               </div>
-              {/* 重複的區塊，根據不同的 icon 和樣式調整 */}
               <div className="flex mt-4">
                   <div className="w-[304.3px] flex flex-row gap-[10px]">
                       <div className="relative flex-1 cursor-pointer">
@@ -890,8 +889,9 @@ export const GameBidding: React.FC = () => {
                               handleCall( 0 , "PASS");
                             }} 
                             className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-green-600 rounded-[15px]"
-                          ></div>
-                          <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">PASS</div>
+                          >
+                            <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">PASS</div>
+                          </div>
                       </div>
                       <div className="relative w-[86px] h-[40px] cursor-pointer">
                           <div className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-yellow-400 border border-yellow-300 rounded-[15px]"></div>
