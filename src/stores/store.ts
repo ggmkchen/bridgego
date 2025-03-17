@@ -4,6 +4,8 @@ import { create } from "zustand";
 // 定義 Zustand 狀態的型別
 interface AppState {
   currentPage: string; // 當前頁面名稱
+  userType: number; //訪客、一般會員
+  setUserType: (userType: number) => void; // 設定userType的方法
   guestName: string;   // 訪客名稱
   setPage: (page: string) => void; // 切換頁面
   setGuestName: (name: string) => void; // 設定訪客名稱
@@ -18,6 +20,8 @@ interface AppState {
 // 使用 Zustand 創建狀態，並提供明確的類型
 export const useAppStore = create<AppState>((set) => ({
   currentPage: "home", // 預設為首頁
+  userType: 2,
+  setUserType: (userType) => set({ userType }),
   guestName: "",
   setPage: (page: string) => set({ currentPage: page }), // 切換頁面函式
   setGuestName: (name: string) => set({ guestName: name }), // 設定訪客名稱函式

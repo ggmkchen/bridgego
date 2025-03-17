@@ -41,6 +41,7 @@ const GuestInterface: React.FC = () => {
   const guestNameRef = useRef<HTMLInputElement>(null);  
   const setAccount = useAppStore((state) => state.setAccount);
   const setPage = useAppStore((state) => state.setPage);
+  const userType = useAppStore((state) => state.userType); // 從store拿取userType的值。
 
   const handleLoginAndFetchGame = async () => {
     if (!guestNameRef.current) return;
@@ -54,8 +55,8 @@ const GuestInterface: React.FC = () => {
     try {
       // 呼叫第一支 API (POST /loginAsGuest)
       const loginResponse = await axios.post(
-        "/loginAsGuest",
-        { account },
+        "/players",
+        { account, userType },
         {
           headers: {
             "Content-Type": "application/json",
@@ -875,6 +876,7 @@ export const Home: React.FC = () => {
   const volume = useAppStore((state) => state.volume); // 獲取音量大小
   const setVolume = useAppStore((state) => state.setVolume); // 獲取設定音量的方法
   const audioRef = useRef<HTMLAudioElement>(null);
+  const setUserType = useAppStore((state) => state.setUserType);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -930,7 +932,10 @@ export const Home: React.FC = () => {
             </button>
             <button
               className="w-[140px] h-[30px] z-5 mb-[50px] flex justify-center items-center bg-[#FFBF00] border-none rounded-[15px] font-bold text-[20px] cursor-pointer text-[#9D3E09] shadow-md"
-              onClick={() => setPage("guest")}
+              onClick={() => {
+                setUserType(2),
+                setPage("guest")
+              }}
             >
               <FaRegFaceGrinWink style={{ marginRight: "10px" }} />
               我是訪客
