@@ -672,10 +672,10 @@ export const GameBidding: React.FC = () => {
     >
       <div className="absolute flex flex-col gap-1 bottom-[10px] right-[330px]">
         <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
-            <div className="absolute ml-16 mt-3 font-bold text-[#FFF7E9] text-[16px]">墩數 :</div>
+            <div className="absolute ml-16 mt-3 font-bold text-[#FFF7E9] text-[12px]">墩數(莊家/防家) :</div>
             <div className="absolute w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]">
-              <span className="absolute top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[25px] font-bold">
-                {selectedNum !== null ? `${6 + selectedNum}` : ''}
+              <span className="absolute top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[20px] font-bold">
+                {selectedNum !== null ? `${6 + selectedNum}/${8 - selectedNum}` : ''}
               </span>
             </div>
         </div>
