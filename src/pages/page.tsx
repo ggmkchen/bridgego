@@ -733,10 +733,11 @@ export const GameBidding: React.FC = () => {
               <div className="flex space-x-2 ml-2 mr-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((num) => {
                     // 計算目前按鈕的叫牌等級
-                    const AreaSuit = "NO_KING";
-                    const currentRank = getBidRank(num, AreaSuit);
+                    const currentRank = getBidRank(num, "NO_KING");
                     // 判斷此按鈕是否要 disabled（已選擇的叫牌大於 0 且低於目前選擇的叫牌）
+                    console.log(`currentRank=${currentRank}`)
                     const disabled: boolean = selectedBidRank > 0 && currentRank < selectedBidRank;
+                    console.log(`currentRank=${selectedBidRank}`)
                     return(
                       <div key={num} 
                           onClick={() => {
