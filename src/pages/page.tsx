@@ -603,7 +603,7 @@ export const GameBidding: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const gameId = useAppStore((state) => state.roomId);             // 從 Zustand Store 獲取 gameId
   const account = useAppStore((state) => state.account);           // 從 Zustand Store 獲取 account
-  const [selectedNum, setSelectedNum] = useState(0);
+  const [selectedNum, setSelectedNum] = useState<number | null>(null);
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
   const [selectedBidRank, setSelectedBidRank] = useState(0);       // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
   const [disabledAll, setDisabledAll] = useState<boolean>(false);  // 新增一個 state，用來標記是否已點擊 PASS，若 true 則 disable 所有叫牌按鈕
@@ -670,11 +670,11 @@ export const GameBidding: React.FC = () => {
         className="h-screen bg-center bg-contain bg-no-repeat flex"
         style={{ backgroundImage: 'url("/start.png")' }}
     >
-      <div className="absolute flex flex-col gap-1 bottom-[10px] right-[330px]">
+      <div className="flex flex-col gap-1 bottom-[10px] right-[330px]">
         <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
-            <div className="absolute ml-4 mt-3 font-bold text-[#FFF7E9] text-[14px]">墩數(莊家/防家) :</div>
-            <div className="absolute w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]">
-              <span className="absolute top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[20px] font-bold">
+            <div className="ml-4 mt-3 font-bold text-[#FFF7E9] text-[14px]">墩數(莊家/防家) :</div>
+            <div className="w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]">
+              <span className="top-1/2 left-2/3 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[20px] font-bold">
                 {selectedNum !== null ? `${6 + selectedNum}/${8 - selectedNum}` : ''}
               </span>
             </div>
