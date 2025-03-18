@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+// 定義花色型別，限定只有這五種
+type Suit = "NO_KING" | "SPADE" | "HEART" | "DIAMOND" | "CLUB" | "PASS";
 
 // 定義 Zustand 狀態的型別
 interface AppState {
@@ -15,6 +17,10 @@ interface AppState {
   setAccount: (account: string) => void; // 設定帳號的方法
   roomId: string; //儲存房間號碼
   setRoomId: (roomId: string) => void; //設定房間號碼
+  selectedNum: number | null;
+  setSelectedNum: (selectedNum: number | null) => void;
+  selectedSuit: Suit | null;
+  setSelectedSuit: (selectedSuit: Suit | null) => void;
 }
 
 // 使用 Zustand 創建狀態，並提供明確的類型
@@ -31,5 +37,9 @@ export const useAppStore = create<AppState>((set) => ({
   setAccount: (account) => set({ account }),
   roomId: "", //初始房間號碼為空
   setRoomId: (roomId) => set({ roomId }),
+  selectedNum: null,
+  setSelectedNum: (selectedNum: number | null) => set({ selectedNum }),
+  selectedSuit: null,
+  setSelectedSuit: (selectedSuit: Suit | null) => set({ selectedSuit }),
 }));
 

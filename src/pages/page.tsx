@@ -603,8 +603,12 @@ export const GameBidding: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const gameId = useAppStore((state) => state.roomId);             // 從 Zustand Store 獲取 gameId
   const account = useAppStore((state) => state.account);           // 從 Zustand Store 獲取 account
-  const [selectedNum, setSelectedNum] = useState<number | null>(null);
-  const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
+  const selectedNum = useAppStore((state) => state.selectedNum);
+  const setSelectedNum = useAppStore((state) => state.setSelectedNum);
+  //const [selectedNum, setSelectedNum] = useState<number | null>(null);
+  const selectedSuit = useAppStore((state) => state.selectedSuit);
+  const setSelectedSuit = useAppStore((state) => state.setSelectedSuit);
+  //const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
   const [selectedBidRank, setSelectedBidRank] = useState(0);       // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
   const [disabledAll, setDisabledAll] = useState<boolean>(false);  // 新增一個 state，用來標記是否已點擊 PASS，若 true 則 disable 所有叫牌按鈕
 
@@ -674,7 +678,7 @@ export const GameBidding: React.FC = () => {
         <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
             <div className="absolute ml-4 mt-3 font-bold text-[#FFF7E9] text-[14px]">墩數(莊家/防家) :</div>
             <div className="absolute w-[180px] h-[35px] border-dashed border-[2px] border-[#FFF7E9] rounded-[10px] m-[7px]">
-              <span className="absolute top-1/2 left-40 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[20px] font-bold">
+              <span className="absolute top-1/2 left-32 transform -translate-x-1/2 -translate-y-1/2 text-[#4E1D02] text-[20px] font-bold">
                 {selectedNum !== null ? `${6 + selectedNum}/${8 - selectedNum}` : ''}
               </span>
             </div>
@@ -895,7 +899,14 @@ export const GameBidding: React.FC = () => {
                       </div>
                       <div className="relative w-[86px] h-[40px] cursor-pointer">
                           <div className="absolute w-[99.24%] h-[91.05%] top-[9.17%] left-[0.76%] bg-yellow-400 border border-yellow-300 rounded-[15px]"></div>
-                          <div className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]">V</div>
+                          <div
+                            onClick={() => {
+                              setPage("play");
+                            }} 
+                          className="absolute w-[61.05%] h-[54.59%] top-[15%] left-[23%] text-center font-bold text-xl text-[#FFF7E9]"
+                          >
+                            V
+                          </div>
                       </div>
                   </div>
               </div>
