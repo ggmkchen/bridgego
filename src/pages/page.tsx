@@ -57,7 +57,9 @@ const GuestInterface: React.FC = () => {
       // 呼叫第一支 API (POST /loginAsGuest)
       const loginResponse = await axios.post(
         "/players",
-        { account, type },
+        { "account": account, 
+          "type": type 
+        },
         {
           headers: {
             "Content-Type": "application/json",
