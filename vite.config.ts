@@ -10,11 +10,11 @@ export default defineConfig({
     host: '0.0.0.0', // 將伺服器綁定到 0.0.0.0
     port: process.env.PORT ? Number(process.env.PORT) : 4173, // 將字串轉換為數字
     proxy: {
-      '/loginAsGuest': {
+      '/players': {
         target: 'https://bridge-4204.onrender.com',
         changeOrigin: true,
       },
-      '/game': {
+      '/games': {
         target: 'https://bridge-4204.onrender.com',
         changeOrigin: true,
       },
