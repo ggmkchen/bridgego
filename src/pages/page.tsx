@@ -3,7 +3,7 @@ import { FaRegFaceGrin, FaRegFaceGrinWink } from "react-icons/fa6";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
 import { useWebSocket } from "./websocket";
-import { useAppStore} from "../stores/store"; // 引入 zustand 狀態
+import { useAppStore, useGameStore, Card, Suit} from "../stores/store"; // 引入 zustand 狀態
 
 
 const CustomButton: React.FC<{ label: string; iconUrl?: string; icon?: React.ReactNode; onClick?: () => void }> = ({
@@ -922,7 +922,67 @@ export const GameBidding: React.FC = () => {
 
 export const GamePlay: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
+  const { player1Cards, player2Cards, player3Cards, player4Cards, setCards } = useGameStore();
+
   
+  // 卡牌轉換成圖片路徑的函式
+  const getCardImage = (card: Card): string => {
+    // 將卡牌花色轉換為圖片檔名中的前置字串
+    let suitName = '';
+    switch (card.suit) {
+      case 'HEART':
+        suitName = 'hearts';
+        break;
+      case 'SPADE':
+        suitName = 'spades';
+        break;
+      case 'CLUB':
+        suitName = 'clubs';
+        break;
+      case 'DIAMOND':
+        suitName = 'diamonds';
+        break;
+      default:
+        break;
+    }
+    // 根據數字決定檔名，1 為 A、11 為 J、12 為 Q、13 為 K，其餘則直接用數字
+    let numberStr = '';
+    if (card.number === 1) {
+      numberStr = 'A';
+    } else if (card.number === 11) {
+      numberStr = 'J';
+    } else if (card.number === 12) {
+      numberStr = 'Q';
+    } else if (card.number === 13) {
+      numberStr = 'K';
+    } else {
+      numberStr = card.number.toString();
+    }
+    // 組合成圖片路徑，假設圖片都放在 public 資料夾下
+    return `/${suitName}_${numberStr}.png`;
+  };
+
+  useEffect(() => {
+    // 建立 WebSocket 連線 (請替換成你自己的 WebSocket URL)
+    const socket = new WebSocket('ws://your-websocket-url');
+
+    socket.onopen = () => {
+      console.log('WebSocket 已連線');
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      // 若資料型別為 SHUFFLE，更新狀態
+      if (data.type === 'SHUFFLE') {
+        setCards(data);
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [setCards]);
+
   return (
     <div
         className="h-screen bg-center bg-contain bg-no-repeat flex"
@@ -937,6 +997,51 @@ export const GamePlay: React.FC = () => {
             <div className="absolute ml-16 mt-2 text-[#66635d] text-[25px]">王牌</div>
             <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]"></div>
         </div>
+      </div>
+      {/* 這裡示範玩家1的卡牌顯示，其他玩家的可依需求設計位置 */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {player1Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
+      {/* 可以類似方式新增其他玩家的牌區，例如： */}
+      {/* 玩家2的牌區 */}
+      <div className="absolute top-10 left-10 flex space-x-2">
+        {player2Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
+      {/* 玩家3的牌區 */}
+      <div className="absolute top-10 right-10 flex space-x-2">
+        {player3Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
+      {/* 玩家4的牌區 */}
+      <div className="absolute top-1/2 right-10 transform -translate-y-1/2 flex space-x-2">
+        {player4Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
       </div>
       <div className="absolute flex flex-col items-center justify-center space-y-1 bottom-2 left-[740px]">
       {/* 圖片 */}

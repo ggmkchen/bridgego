@@ -1,7 +1,21 @@
 import { create } from "zustand";
 
 // 定義花色型別，限定只有這五種
-type Suit = "NO_KING" | "SPADE" | "HEART" | "DIAMOND" | "CLUB" | "PASS";
+export type Suit = "NO_KING" | "SPADE" | "HEART" | "DIAMOND" | "CLUB" | "PASS";
+
+export interface Card {
+  suit: Suit;
+  number: number;
+}
+
+export interface ShuffleData {
+  player1Cards: Card[];
+  player2Cards: Card[];
+  player3Cards: Card[];
+  player4Cards: Card[];
+  type: string;
+  createTime: string;
+}
 
 // 定義 Zustand 狀態的型別
 interface AppState {
@@ -43,3 +57,25 @@ export const useAppStore = create<AppState>((set) => ({
   setSelectedSuit: (selectedSuit: Suit | null) => set({ selectedSuit }),
 }));
 
+
+interface GameState {
+  player1Cards: Card[];
+  player2Cards: Card[];
+  player3Cards: Card[];
+  player4Cards: Card[];
+  setCards: (data: ShuffleData) => void;
+}
+
+export const useGameStore = create<GameState>((set) => ({
+  player1Cards: [],
+  player2Cards: [],
+  player3Cards: [],
+  player4Cards: [],
+  setCards: (data: ShuffleData) =>
+    set({
+      player1Cards: data.player1Cards,
+      player2Cards: data.player2Cards,
+      player3Cards: data.player3Cards,
+      player4Cards: data.player4Cards,
+    }),
+}));

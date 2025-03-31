@@ -36,7 +36,7 @@ export const useWebSocket = (): {
       console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
       setConnected(true);
 
-      const topics = [`/topic/entry/${account}`, `/topic/begin/${account}`];
+      const topics = [`/topic/entry/${account}`, `/topic/begin/${account}`,"/topic/shuffle"];
       topics.forEach((topic) => {
         stompClient.subscribe(topic, (message: IMessage) => {
           console.log(`從 ${topic} 收到訊息: ${message.body}`);
