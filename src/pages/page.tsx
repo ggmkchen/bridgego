@@ -3,7 +3,7 @@ import { FaRegFaceGrin, FaRegFaceGrinWink } from "react-icons/fa6";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
 import { useWebSocket } from "./websocket";
-import { useAppStore, useGameStore, Card, Suit} from "../stores/store"; // 引入 zustand 狀態
+import { useAppStore, useGameStore, Card} from "../stores/store"; // 引入 zustand 狀態
 
 
 const CustomButton: React.FC<{ label: string; iconUrl?: string; icon?: React.ReactNode; onClick?: () => void }> = ({
@@ -923,6 +923,7 @@ export const GameBidding: React.FC = () => {
 export const GamePlay: React.FC = () => {
   const setPage = useAppStore((state) => state.setPage);
   const { player1Cards, player2Cards, player3Cards, player4Cards, setCards } = useGameStore();
+  const { messages, connected } = useWebSocket();
 
   
   // 卡牌轉換成圖片路徑的函式
@@ -962,26 +963,18 @@ export const GamePlay: React.FC = () => {
     return `/${suitName}_${numberStr}.png`;
   };
 
+  // 當 messages 更新時，若最新的訊息屬於 /topic/shuffle，則更新卡牌資料
   useEffect(() => {
-    // 建立 WebSocket 連線 (請替換成你自己的 WebSocket URL)
-    const socket = new WebSocket('ws://your-websocket-url');
-
-    socket.onopen = () => {
-      console.log('WebSocket 已連線');
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      // 若資料型別為 SHUFFLE，更新狀態
-      if (data.type === 'SHUFFLE') {
-        setCards(data);
+    if (messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      if (latestMessage.topic === "/topic/shuffle") {
+        const data = JSON.parse(latestMessage.body);
+        if (data.type === "SHUFFLE") {
+          setCards(data);
+        }
       }
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, [setCards]);
+    }
+  }, [messages, setCards]);
 
   return (
     <div
@@ -998,7 +991,7 @@ export const GamePlay: React.FC = () => {
             <div className="absolute w-[180px] h-[105px] border-dashed border-[2px] border-[#804817] rounded-[10px] m-[6px]"></div>
         </div>
       </div>
-      {/* 這裡示範玩家1的卡牌顯示，其他玩家的可依需求設計位置 */}
+      {/* 玩家1的牌區 (下方中間) */}
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {player1Cards.map((card, index) => (
           <img
@@ -1009,8 +1002,7 @@ export const GamePlay: React.FC = () => {
           />
         ))}
       </div>
-      {/* 可以類似方式新增其他玩家的牌區，例如： */}
-      {/* 玩家2的牌區 */}
+      {/* 玩家2的牌區 (左上角) */}
       <div className="absolute top-10 left-10 flex space-x-2">
         {player2Cards.map((card, index) => (
           <img
@@ -1021,7 +1013,7 @@ export const GamePlay: React.FC = () => {
           />
         ))}
       </div>
-      {/* 玩家3的牌區 */}
+      {/* 玩家3的牌區 (右上角) */}
       <div className="absolute top-10 right-10 flex space-x-2">
         {player3Cards.map((card, index) => (
           <img
@@ -1032,7 +1024,7 @@ export const GamePlay: React.FC = () => {
           />
         ))}
       </div>
-      {/* 玩家4的牌區 */}
+      {/* 玩家4的牌區 (右側中間) */}
       <div className="absolute top-1/2 right-10 transform -translate-y-1/2 flex space-x-2">
         {player4Cards.map((card, index) => (
           <img
