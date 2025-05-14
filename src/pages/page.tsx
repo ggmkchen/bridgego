@@ -615,6 +615,8 @@ export const GameBidding: React.FC = () => {
   //const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
   const [selectedBidRank, setSelectedBidRank] = useState(0);       // 存放目前選擇的叫牌等級（初始為 0 表示未選擇）
   const [disabledAll, setDisabledAll] = useState<boolean>(false);  // 新增一個 state，用來標記是否已點擊 PASS，若 true 則 disable 所有叫牌按鈕
+  const { player1Cards, player2Cards, player3Cards, player4Cards, setCards } = useGameStore();  //從 useGameStore 獲取卡牌相關狀態和方法
+  const { messages } = useWebSocket(); 
 
   
   // 定義花色型別，限定只有這五種
@@ -636,6 +638,55 @@ export const GameBidding: React.FC = () => {
     return (num - 1) * 5 + suitRank[suit];
   }
 
+  // 新增：卡牌轉換成圖片路徑的函式 (從 GamePlay 複製過來)
+  const getCardImage = (card: Card): string => {
+    // 將卡牌花色轉換為圖片檔名中的前置字串
+    let suitName = '';
+    switch (card.suit) {
+      case 'HEART':
+        suitName = 'hearts';
+        break;
+      case 'SPADE':
+        suitName = 'spades';
+        break;
+      case 'CLUB':
+        suitName = 'clubs';
+        break;
+      case 'DIAMOND':
+        suitName = 'diamonds';
+        break;
+      default:
+        break;
+    }
+    // 根據數字決定檔名，1 為 A、11 為 J、12 為 Q、13 為 K，其餘則直接用數字
+    let numberStr = '';
+    if (card.number === 1) {
+      numberStr = 'A';
+    } else if (card.number === 11) {
+      numberStr = 'J';
+    } else if (card.number === 12) {
+      numberStr = 'Q';
+    } else if (card.number === 13) {
+      numberStr = 'K';
+    } else {
+      numberStr = card.number.toString();
+    }
+    // 組合成圖片路徑，假設圖片都放在 public 資料夾下
+    return `/${suitName}_${numberStr}.png`;
+  };
+
+  // 新增：當 messages 更新時，若最新的訊息屬於 /topic/shuffle，則更新卡牌資料 (從 GamePlay 複製過來)
+  useEffect(() => {
+    if (messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      if (latestMessage.topic === "/topic/shuffle") {
+        const data = JSON.parse(latestMessage.body);
+        if (data.type === "SHUFFLE") {
+          setCards(data);
+        }
+      }
+    }
+  }, [messages, setCards]);
 
   // 叫牌 API 呼叫
   const handleCall = async (num: number, suit: Suit): Promise<void> => {
@@ -678,6 +729,51 @@ export const GameBidding: React.FC = () => {
         className="h-screen bg-center bg-contain bg-no-repeat flex"
         style={{ backgroundImage: 'url("/start.png")' }}
     >
+      {/* 新增：顯示各玩家的牌 (從 GamePlay 複製並整合) */}
+      {/* 玩家1的牌區 (下方中間) */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {player1Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24" // 您可以根據需要調整卡牌大小和樣式
+          />
+        ))}
+      </div>
+      {/* 玩家2的牌區 (左上角) */}
+      <div className="absolute top-10 left-10 flex space-x-2">
+        {player2Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
+      {/* 玩家3的牌區 (右上角) */}
+      <div className="absolute top-10 right-10 flex space-x-2">
+        {player3Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
+      {/* 玩家4的牌區 (右側中間) */}
+      <div className="absolute top-1/2 right-10 transform -translate-y-1/2 flex space-x-2"> {/* 調整為更靠右側 */}
+        {player4Cards.map((card, index) => (
+          <img
+            key={index}
+            src={getCardImage(card)}
+            alt={`${card.suit} ${card.number}`}
+            className="w-16 h-24"
+          />
+        ))}
+      </div>
       <div className="absolute flex flex-col gap-1 bottom-[10px] right-[330px]">
         <div className="w-[200px] h-[55px] rounded-[15px] border-[3px] border-[#804817] bg-[#964C5F] text-[#FFF] text-[20px] font-extrabold">
             <div className="absolute ml-4 mt-3 font-bold text-[#FFF7E9] text-[14px]">墩數(莊家/防家) :</div>
