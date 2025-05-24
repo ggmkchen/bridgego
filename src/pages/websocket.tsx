@@ -6,12 +6,6 @@ import { useAppStore} from "../stores/store"; // 引入 zustand 狀態
 const stompClient = new Client({
   brokerURL: "wss://bridge-4204.onrender.com/gs-guide-websocket",
   reconnectDelay: 5000,
-  onConnect: (frame) => {
-    console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
-  },
-  onStompError: (frame) => {
-    console.error("STOMP 錯誤，詳細資訊: ", frame);
-  },
 });
 
 interface WebSocketMessage {
@@ -50,11 +44,13 @@ export const useWebSocket = (): {
       console.error("STOMP 錯誤，詳細資訊: ", frame);
     };
 
+    stompClient.activate(); // 將 activate 移至回調設定之後，確保回調已準備好
+
     return () => {
       console.log("正在斷開 WebSocket 連線...");
       stompClient.deactivate();
     };
-  }, []);
+  }, [account]);
 
   const sendMessage = (topic: string, body: any) => {
     if (stompClient.connected) {
