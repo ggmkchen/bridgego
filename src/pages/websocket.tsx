@@ -27,6 +27,7 @@ export const useWebSocket = (): {
     stompClient.activate();
 
     stompClient.onConnect = (frame) => {
+      console.log("WebSocket 已成功連線到伺服器，所有 headers:", frame.headers);
       console.log("WebSocket 已成功連線到伺服器，sessionId:", frame.headers["session"]);
       setConnected(true);
 
