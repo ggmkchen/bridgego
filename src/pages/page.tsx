@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { FaRegFaceGrin, FaRegFaceGrinWink } from "react-icons/fa6";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
@@ -485,21 +485,9 @@ const RoomPage: React.FC = () => {
     }
   };
 
-  // 進入房間時發送 ENTRY 訊息。
-  // useEffect 確保這個邏輯只會在 connected 改變時執行。
-  useEffect(() => {
-    if (connected) {
-      sendMessage("/topic/entry", {
-        type: "ENTRY",
-        message: `new player ${account} has entered the room`,
-        createTime: new Date().toISOString(),
-      });
-      console.log("已發送 ENTRY 訊息");
-    }
-  }, [connected]);
-
   // 立即開始遊戲 API 呼叫（處理 READY 訊息）
-  const handleStartGame = async () => {
+  const handleStartGame = useCallback
+  (async () => {
     try {
       const token = account; // 使用 account 作為 token
       await axios.put(
@@ -516,15 +504,19 @@ const RoomPage: React.FC = () => {
       console.error("開始遊戲 API 呼叫失敗:", error);
       alert("開始遊戲失敗，請稍後再試");
     }
-  };
+  }, [account, gameId]);
 
   // 處理 WebSocket 訊息
   useEffect(() => {
-    messages.forEach((msg) => {
-      const parsedMsg = JSON.parse(msg.body);
+    if (messages.length > 0) { // 只在有新訊息時處理
+      const latestMessage = messages[messages.length - 1]; // 通常只處理最新的訊息，避免重複處理
+      const parsedMsg = JSON.parse(latestMessage.body);
 
-      if (msg.topic.startsWith("/topic/begin/")) {
-        console.log("收到 /topic/begin 訊息:", parsedMsg);
+      // 檢查 topic 是否為 `/topic/begin/${account}`
+      // 注意：websocket.tsx 中訂閱的是 `/topic/begin/${account}` 和 `/topic/shuffle`
+      // 而此處判斷的是 msg.topic.startsWith("/topic/begin/")，這會匹配到 `/topic/begin/${account}`
+      if (latestMessage.topic === `/topic/begin/${account}`) { 
+        console.log(`收到 ${latestMessage.topic} 訊息:`, parsedMsg);
 
         if (parsedMsg.type === "READY") {
           console.log("收到 READY 訊息，呼叫開始遊戲 API");
@@ -547,10 +539,14 @@ const RoomPage: React.FC = () => {
               return prev - 1;
             });
           }, 1000);
+          // 清理 interval
+          return () => clearInterval(timer);
         }
       }
-    });
-  }, [messages]);
+      // 如果需要處理 /topic/shuffle 或其他 topic 的訊息，可以在這裡添加 else if
+      // else if (latestMessage.topic === "/topic/shuffle") { ... }
+    }
+  }, [messages, account, handleStartGame, setPage]); // 加入依賴項
 
   return (
     <div
