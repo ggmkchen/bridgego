@@ -512,41 +512,35 @@ const RoomPage: React.FC = () => {
       const latestMessage = messages[messages.length - 1]; // 通常只處理最新的訊息，避免重複處理
       const parsedMsg = JSON.parse(latestMessage.body);
 
-      // 檢查 topic 是否為 `/topic/begin/${account}`
-      // 注意：websocket.tsx 中訂閱的是 `/topic/begin/${account}` 和 `/topic/shuffle`
-      // 而此處判斷的是 msg.topic.startsWith("/topic/begin/")，這會匹配到 `/topic/begin/${account}`
       if (latestMessage.topic === `/topic/begin/${account}`) { 
         console.log(`收到 ${latestMessage.topic} 訊息:`, parsedMsg);
 
         if (parsedMsg.type === "READY") {
-          console.log("收到 READY 訊息，呼叫開始遊戲 API");
-          handleStartGame(); // 立即打 API，變更遊戲狀態
+          console.log("收到 READY 訊息，啟用開始遊戲按鈕");
+          setIsGameStartEnabled(true); // 在 READY 時啟用按鈕
+          // handleStartGame(); // 不在這裡自動調用，等待用戶點擊
         }
 
         if (parsedMsg.type === "BEGIN") {
           console.log("收到 BEGIN 訊息，開始倒數計時！");
-          setIsGameStartEnabled(true);
+          // setIsGameStartEnabled(true); // 按鈕應該在 READY 時就啟用了
           setCountdown(5);
 
-          // 開始倒數
           const timer = setInterval(() => {
             setCountdown((prev) => {
               if (prev === null || prev <= 1) {
                 clearInterval(timer);
-                setPage("bidding"); // 倒數結束後自動跳轉
+                setPage("play"); 
                 return null;
               }
               return prev - 1;
             });
           }, 1000);
-          // 清理 interval
           return () => clearInterval(timer);
         }
       }
-      // 如果需要處理 /topic/shuffle 或其他 topic 的訊息，可以在這裡添加 else if
-      // else if (latestMessage.topic === "/topic/shuffle") { ... }
     }
-  }, [messages, account, handleStartGame, setPage]); // 加入依賴項
+  }, [messages, account, /* handleStartGame, */ setPage]); // handleStartGame 可能不需要在依賴項中，除非它的引用會變
 
   return (
     <div
@@ -582,8 +576,8 @@ const RoomPage: React.FC = () => {
               退出房間
             </button>
             <button
-              //onClick={handleStartGame}
-              disabled={!isGameStartEnabled} // 動態控制按鈕是否禁用
+              onClick={handleStartGame} // 將 handleStartGame 綁定到 onClick
+              disabled={!isGameStartEnabled} 
               className={`w-[120px] h-[40px] mt-4 py-2 px-6 font-bold rounded shadow ${
                 isGameStartEnabled
                   ? "bg-[#FFBF00] text-[#9D3E09] hover:brightness-110"
